@@ -29,3 +29,6 @@ address = "Makai Road, Masaki, Dar es Salaam, Tanzania"
 location = get_location_by_address(address)
 pprint(location)
 
+latitude = location["lat"]
+longitude = location["lon"]
+print(f"{latitude}, {longitude}")
