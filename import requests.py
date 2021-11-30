@@ -10,10 +10,6 @@ from pprint import pprint
 
 app = Nominatim(user_agent="tutorial")
 
-#setzte location nach Stadt Name
-location = app.geocode("Nairobi, Kenya").raw
-pprint(location)
-
 #gibt eine location basierend auf der Adresse aus
 def get_location_by_address(address):
     """This function returns a location as raw from an address
@@ -24,11 +20,10 @@ def get_location_by_address(address):
     except:
         return get_location_by_address(address)
 
-#Testen der Funktion
-address = "Makai Road, Masaki, Dar es Salaam, Tanzania"
-location = get_location_by_address(address)
-pprint(location)
+addresses = ["Berlin, Germany", "Hamburg, Germany", "Stuttgart, Germany"]
 
-latitude = location["lat"]
-longitude = location["lon"]
-print(f"{latitude}, {longitude}")
+for s in addresses:
+    location = get_location_by_address(s)
+    latitude = location["lat"]
+    longitude = location["lon"]
+    print(f"{latitude}, {longitude}")
