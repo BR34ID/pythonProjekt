@@ -11,8 +11,6 @@ aoi_coords = list(aoi_geom.exterior.coords)  # get coords from exterior ring
 aoi_coords = [(y, x) for x, y in aoi_coords]  # swap (x,y) to (y,x). Really leaflet?!
 aoi_centroid = aoi_geom.centroid  # Kreuzberg center for map center
 
-
-
 m = folium.Map(tiles='Stamen Toner', location=(aoi_centroid.y, aoi_centroid.x), zoom_start=14)
 folium.vector_layers.Polygon(aoi_coords,
                              color='#ffd699',
@@ -60,5 +58,3 @@ request = {'locations': pubs_coords,
 pubs_matrix = ors.distance_matrix(**request)
 print("Calculated {}x{} routes.".format(len(pubs_matrix['durations']), len(pubs_matrix['durations'][0])))
 print(pubs_matrix)
-
-
