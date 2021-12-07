@@ -11,9 +11,13 @@ class TSP_GUI:
         self.e1 = tk.Entry(mainW)
         self.e2 = tk.Entry(mainW)
         self.e3 = tk.Entry(mainW)
+        self.e4 = tk.Entry(mainW) #wird erst durch Button aktiviert
 
         #Button für mehr Adressfelder
         self.btnMoreAddresses = tk.Button(mainW, text="Say hello", command=self.moreAddresses)
+
+        #Button für Submit
+        self.btnSubmit = tk.Button(mainW, text="Submit!", command=self.submit)
 
         mainW.title('Routenplaner')
 
@@ -24,11 +28,14 @@ class TSP_GUI:
         self.e2.pack()
         self.e3.pack()
         self.btnMoreAddresses.pack()
+        self.btnSubmit.pack()
 
     #Funktion für mehr Adressfelder (btnMoreAddresses)
     def moreAddresses(self):
-        pass
+         self.e4.pack() #dynamisch machen?? 
 
+    def submit(self):
+        self.lbl3.config(text="Hallo.")
 
 
     
