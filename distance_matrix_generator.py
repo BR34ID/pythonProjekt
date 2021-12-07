@@ -19,10 +19,10 @@ def get_adress_coords(adress):
     return [location["lon"], location["lat"]]
 
 def generate_distance_matrix(adresses_list):
-    pubs_coords = []
+    coords = []
     for adress in adresses_list:
-        pubs_coords.append(get_adress_coords(adress))
-    request = {'locations': pubs_coords,
+        coords.append(get_adress_coords(adress))
+    request = {'locations': coords,
            'profile': 'driving-car',
            'metrics': ['distance']}
     response = ors.distance_matrix(**request)
