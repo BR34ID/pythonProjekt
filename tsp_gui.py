@@ -1,4 +1,5 @@
 import tkinter as tk
+import 
 
 adresslist = [] #um Adressen für Distanzmatrix vorzubereiten
 
@@ -32,10 +33,24 @@ class TSP_GUI:
 
     #Funktion für mehr Adressfelder (btnMoreAddresses)
     def addAddress(self):
-        self.lbl4.config(text="Adresse hinzugefügt.")
+        if (isinstance(self.e1.get(), str)):
+            self.lbl4.config(text="Adresse hinzugefügt.")
+            adresslist.append(self.e1.get())
+            self.e1.delete(0,tk.END)
+
+            query = '<' + self.e1.get() + '>'
+            url =   'https://nominatim.openstreetmap.org/search?'
+            url = url + query
+            r = requests.get(url, auth=('user', 'pass'))
+            r.status_code
+
+        else:
+            self.lbl4.config(text="ERROR. Bitte geben Sie eine gültige Adresse ein.")
+
+        
         #fügt Adresse zu Liste hinzu und Prüft ob Adresse erkannt
-        adresslist.append(self.e1.get())
-        self.e1.delete(0,tk.END)
+       
+        
         print(adresslist)
 
     def submit(self):
