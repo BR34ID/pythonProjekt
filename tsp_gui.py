@@ -7,11 +7,27 @@ class TSP_GUI:
 
         self.lbl3 = tk.Label(mainW, text="Bitte geben Sie Ihre Zieladressen ein.")
 
+        #Entry Felder für Adresseingabe
+        self.e1 = tk.Entry(mainW)
+        self.e2 = tk.Entry(mainW)
+        self.e3 = tk.Entry(mainW)
+
+        #Button für mehr Adressfelder
+        self.btnMoreAddresses = tk.Button(mainW, text="Say hello", command=self.moreAddresses)
+
         mainW.title('Routenplaner')
 
         self.lbl1.pack()
         self.lbl2.pack()
         self.lbl3.pack()
+        self.e1.pack()
+        self.e2.pack()
+        self.e3.pack()
+        self.btnMoreAddresses.pack()
+
+    #Funktion für mehr Adressfelder (btnMoreAddresses)
+    def moreAddresses(self):
+        pass
 
 
 
