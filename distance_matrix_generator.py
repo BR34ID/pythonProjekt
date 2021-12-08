@@ -2,7 +2,7 @@ from openrouteservice import client
 from geopy.geocoders import Nominatim
 import time
 
-api_key = 'xxx' #Sophies API KEY
+api_key = '5b3ce3597851110001cf6248580243e4566c4ed28a1f498ab3b27852' #Sophies API KEY
 ors = client.Client(key=api_key)
 app = Nominatim(user_agent="TH_WILDAU_PYTHON_TSP")
 

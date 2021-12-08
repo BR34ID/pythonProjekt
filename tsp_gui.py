@@ -1,5 +1,7 @@
 from tkinter import *
 import requests
+from or_tools_test import getSolution
+import threading
 
 adresslist = []  # um Adressen für Distanzmatrix vorzubereiten
 labels = []
@@ -55,8 +57,14 @@ class TSP_GUI:
 
         print(adresslist)
 
+
+
     def submit(self):
-        self.lbl3.config(text="Hallo.")
+        def runAsync():
+            getSolution(adresslist)
+
+        threading.Thread(target=runAsync).start()
+
 
     def clearList(self):
         adresslist.clear();
