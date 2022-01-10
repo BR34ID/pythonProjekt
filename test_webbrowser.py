@@ -31,7 +31,14 @@ def build_request(solution_index_list):
 
 
 def get_coords(i):
-    return "point=" + distance_matrix_generator.coords[i][1] + "," + distance_matrix_generator.coords[i][0] + "&"
+    INDEX_LONGTITUDE = 1
+    INDEX_LATITUDE = 0;
+    return "point=" + method_name(i, INDEX_LONGTITUDE) + "," + method_name(i, INDEX_LATITUDE) + "&"
+
+
+def method_name(index, coordtype):
+    return distance_matrix_generator.coords[index][coordtype]
+
 
 def read_file_as_string(filename):
     f = open(filename, 'r')
