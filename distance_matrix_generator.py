@@ -5,6 +5,8 @@ import time
 api_key = '5b3ce3597851110001cf6248580243e4566c4ed28a1f498ab3b27852' #Sophies API KEY
 ors = client.Client(key=api_key)
 app = Nominatim(user_agent="TH_WILDAU_PYTHON_TSP")
+distance_matrix = []
+coords = [[]]
 
 #gibt eine location basierend auf der Adresse aus
 def get_location_by_address(address):
@@ -19,13 +21,25 @@ def get_adress_coords(adress):
     return [location["lon"], location["lat"]]
 
 def generate_distance_matrix(adresses_list):
-    coords = []
-    for adress in adresses_list:
-        coords.append(get_adress_coords(adress))
+    global coords
+    coords = generate_coordinates_list(adresses_list)
+    print("coords:")
+    print(coords)
     request = {'locations': coords,
            'profile': 'driving-car',
            'metrics': ['distance']}
     response = ors.distance_matrix(**request)
     print("Calculated {}x{} routes.".format(len(response['distances']), len(response['distances'][0])))
     print(response['distances'])
+    global distance_matrix
+    distance_matrix = response['distances']
     return response['distances']
+
+
+def generate_coordinates_list(adresses_list):
+    coordslist = []
+    for adress in adresses_list:
+        coordslist.append(get_adress_coords(adress))
+    print("coordslist")
+    print(coordslist)
+    return coordslist

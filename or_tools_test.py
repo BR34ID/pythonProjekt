@@ -1,8 +1,6 @@
-from distance_matrix_generator import generate_distance_matrix
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 
-addresses = ["Berlin, Germany", "Hamburg, Germany", "Stuttgart, Germany"]
-
+solution_nodes = []
 
 def create_data_model(distance_matrix):
     """Stores the data for the problem."""
@@ -25,19 +23,21 @@ def print_solution(manager, routing, solution, addresses):
     index = routing.Start(0)
     plan_output = 'Route:\n'
     route_distance = 0
+    solution_nodes.clear()
     while not routing.IsEnd(index):
         plan_output += ' {} ->'.format(addresses[manager.IndexToNode(index)])
         previous_index = index
         index = solution.Value(routing.NextVar(index))
+        solution_nodes.append(manager.IndexToNode(index))
         route_distance += routing.GetArcCostForVehicle(previous_index, index, 0)
     plan_output += ' {}\n'.format(addresses[manager.IndexToNode(index)])
     plan_output += 'Distanz: {} km\n'.format(route_distance/1000)
     print(plan_output)
+    print(solution_nodes)
 
-
-def getSolution(addresses):
+def getSolution(addresses, distance_matrix):
     global data, manager
-    data = create_data_model(generate_distance_matrix(addresses))
+    data = create_data_model(distance_matrix)
     manager = pywrapcp.RoutingIndexManager(len(data['distance_matrix']), data['num_vehicles'], data['depot'])
     routing = pywrapcp.RoutingModel(manager)
     transit_callback_index = routing.RegisterTransitCallback(distance_callback)

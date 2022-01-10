@@ -1,12 +1,14 @@
 from tkinter import *
 import requests
-from or_tools_test import getSolution
+from or_tools_test import getSolution, solution_nodes
 import threading
 import urllib.parse
+from distance_matrix_generator import generate_distance_matrix
+from test_webbrowser import build_request
 
 adresslist = []  # um Adressen für Distanzmatrix vorzubereiten
 labels = []
-
+distance_matrix = []
 
 class TSP_GUI:
     def __init__(self, mainW):
@@ -74,9 +76,14 @@ class TSP_GUI:
         print(str(r.content) != "b'[]'")
         return str(r.content) != "b'[]'"
 
+
     def submit(self):
+        def visualize():
+            build_request(solution_nodes)
+
         def runAsync():
-            getSolution(adresslist)
+            getSolution(adresslist, generate_distance_matrix(adresslist))
+            visualize()
             self.routeErzeugenButton.config(state="normal")
 
         threading.Thread(target=runAsync).start()
