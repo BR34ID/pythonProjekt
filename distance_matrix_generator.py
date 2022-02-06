@@ -2,44 +2,43 @@ from openrouteservice import client
 from geopy.geocoders import Nominatim
 import time
 
-api_key = '5b3ce3597851110001cf6248580243e4566c4ed28a1f498ab3b27852' #Sophies API KEY
-ors = client.Client(key=api_key)
-app = Nominatim(user_agent="TH_WILDAU_PYTHON_TSP")
-distance_matrix = []
-coords = [[]]
 
-#gibt eine location basierend auf der Adresse aus
-def get_location_by_address(address):
-    time.sleep(1)
-    try:
-        return app.geocode(address).raw
-    except:
-        return get_location_by_address(address)
+class DistanceMatrixGenerator:
+    API_KEY = '5b3ce3597851110001cf6248580243e4566c4ed28a1f498ab3b27852'  # Sophies API KEY
 
-def get_adress_coords(adress):
-    location = get_location_by_address(adress)
-    return [location["lon"], location["lat"]]
+    def __init__(self, adressList):
+        self.app = Nominatim(user_agent="TH_WILDAU_PYTHON_TSP")
+        self.ors = client.Client(key=DistanceMatrixGenerator.API_KEY)
+        self.distance_matrix = []
+        self.coords = [[]]
+        self.adressList = adressList
 
-def generate_distance_matrix(adresses_list):
-    global coords
-    coords = generate_coordinates_list(adresses_list)
-    print("coords:")
-    print(coords)
-    request = {'locations': coords,
-           'profile': 'driving-car',
-           'metrics': ['distance']}
-    response = ors.distance_matrix(**request)
-    print("Calculated {}x{} routes.".format(len(response['distances']), len(response['distances'][0])))
-    print(response['distances'])
-    global distance_matrix
-    distance_matrix = response['distances']
-    return response['distances']
+    # gibt eine location basierend auf der Adresse aus
+    def get_location_by_address(self, address):
+        time.sleep(1)
+        try:
+            return self.app.geocode(address).raw
+        except:
+            return self.get_location_by_address(address)
 
+    def get_adress_coords(self, adress):
+        location = self.get_location_by_address(adress)
+        return [location["lon"], location["lat"]]
 
-def generate_coordinates_list(adresses_list):
-    coordslist = []
-    for adress in adresses_list:
-        coordslist.append(get_adress_coords(adress))
-    print("coordslist")
-    print(coordslist)
-    return coordslist
+    def generate_distance_matrix(self):
+        self.coords = self.generate_coordinates_list()
+        request = {'locations': self.coords,
+                   'profile': 'driving-car',
+                   'metrics': ['distance']}
+        response = self.ors.distance_matrix(**request)
+        self.distance_matrix = response['distances']
+        return self.distance_matrix
+
+    def generate_coordinates_list(self):
+        coordslist = []
+        for adress in self.adressList:
+            coordslist.append(self.get_adress_coords(adress))
+        return coordslist
+
+    def getAdresses(self):
+        return self.adressList

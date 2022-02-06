@@ -2,43 +2,34 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtWebEngineWidgets import *
 import folium
-import distance_matrix_generator
+from distance_matrix_generator import DistanceMatrixGenerator
 
-m = folium.Map(location=[45.5236, -122.6750])
+m = folium.Map(location=[52.3260146, 13.6265615])
 m.save("index.html")
 
 #GraphHopper Request zusammenbauen
-graphhopper_api_key = "b35bce5d-2540-4cd0-b030-eb5c02461d24";
-request_options = "&points_encoded=false&profile=car&locale=de&key=" + graphhopper_api_key
-request_base = "https://graphhopper.com/api/1/route?"
-request_points = "point=51.131,12.414&point=52.520008,13.404954"
-request_string = request_base + request_points + request_options
+GRAPHHOPPER_API_KEY = "b35bce5d-2540-4cd0-b030-eb5c02461d24";
+REQUEST_OPTIONS = "&points_encoded=false&profile=car&locale=de&key=" + GRAPHHOPPER_API_KEY
+REQUEST_BASE = "https://graphhopper.com/api/1/route?"
+REQUEST_POINTS = "point=51.131,12.414&point=52.520008,13.404954"
 
-
-def build_request(solution_index_list):
-    pointstring = ""
-    print("solution_index_list")
-    print(solution_index_list)
-    print("+coords:")
-    print(distance_matrix_generator.coords)
-    pointstring += get_coords(0)#Started immer im Depot, welches der erste (=0.) eingegebene Wert ist.
+def build_request(solution_index_list, distanceMatrixGenerator):
+    pointstring = get_coords(distanceMatrixGenerator, 0) #Started immer im Depot, welches der erste (=0.) eingegebene Wert ist.
     for i in solution_index_list:
-        print("Koordinaten: **" + str(i))
-        pointstring += get_coords(i)
-    request_string_ = request_base + pointstring + request_options
-    print(request_string_)
-    return request_string_
+        pointstring += get_coords(distanceMatrixGenerator, i)
+    request_string = REQUEST_BASE + pointstring + REQUEST_OPTIONS
+    print(request_string)
+    return request_string
 
 
-def get_coords(i):
+def get_coords(distanceMatrixGenerator, i):
     INDEX_LONGTITUDE = 1
     INDEX_LATITUDE = 0;
-    return "point=" + method_name(i, INDEX_LONGTITUDE) + "," + method_name(i, INDEX_LATITUDE) + "&"
+    return "point=" + getCoordsFor(distanceMatrixGenerator, i, INDEX_LONGTITUDE) +\
+           "," + getCoordsFor(distanceMatrixGenerator, i, INDEX_LATITUDE) + "&"
 
-
-def method_name(index, coordtype):
-    return distance_matrix_generator.coords[index][coordtype]
-
+def getCoordsFor(distanceMatrixGenerator, index, coordtype):
+    return distanceMatrixGenerator.coords[index][coordtype]
 
 def read_file_as_string(filename):
     f = open(filename, 'r')
@@ -52,6 +43,7 @@ class MainWindow(QMainWindow):
         self.browser.setHtml(read_file_as_string("index.html"))
         self.setCentralWidget(self.browser)
         self.showMaximized()
+
 app = QApplication(sys.argv)
 QApplication.setApplicationName('Lösung:')
 window = MainWindow()

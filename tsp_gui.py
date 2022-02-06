@@ -1,37 +1,42 @@
 from tkinter import *
 import requests
-from or_tools_test import getSolution, solution_nodes
+from or_tools_test import Solver
 import threading
 import urllib.parse
-from distance_matrix_generator import generate_distance_matrix
+from distance_matrix_generator import DistanceMatrixGenerator
 from test_webbrowser import build_request
 
-adresslist = []  # um Adressen für Distanzmatrix vorzubereiten
-labels = []
-distance_matrix = []
 
 class TSP_GUI:
+
+    URL_PREFIX = 'https://nominatim.openstreetmap.org/search?q='
+    URL_SUFFIX = "&format=jsonv2"
+
     def __init__(self, mainW):
-        self.createLabels(mainW)
+        self.distanceMatrixGenerator = None
+        self.create_labels(mainW)
+        self.adresslist = []  # um Adressen für Distanzmatrix vorzubereiten
+        self.labels = []
+        self.distance_matrix = []
 
         # Entry Felder für Adresseingabe
         self.adressEingabefeld = Entry(mainW)
         self.adressEingabefeld.pack()
         self.fenster = mainW
         # Button für mehr Adressfelder
-        self.adresseHinzufuegenButton = Button(mainW, text="Adresse hinzufügen", command=self.addAddress)
+        self.adresseHinzufuegenButton = Button(mainW, text="Adresse hinzufügen", command=self.is_vaild_adress)
         self.adresseHinzufuegenButton.pack()
         # Button zum Löschen der Adressen
-        self.alleAdressenLoeschenButton = Button(mainW, text="Adressen löschen", command=self.clearList)
+        self.alleAdressenLoeschenButton = Button(mainW, text="Adressen löschen", command=self.clear_list)
         self.alleAdressenLoeschenButton.pack()
 
         # Button für Submit
-        self.routeErzeugenButton = Button(mainW, text="Route erzeugen!", command=self.submit)
+        self.routeErzeugenButton = Button(mainW, text="Route erzeugen!", command=self.solve)
         self.routeErzeugenButton.pack()
 
         mainW.title('Routenplaner')
 
-    def createLabels(self, fenster):
+    def create_labels(self, fenster):
         Label(fenster, text="Rotenplaner Deluxe", font=("Arial", 20)).pack()
         Label(fenster, text="von Sophie R., Svea-Nele J., Niklas L.", font=("Arial", 14, "italic")).pack()
         Label(fenster, text="Bitte geben Sie Ihre Zieladressen ein.").pack()
@@ -39,64 +44,51 @@ class TSP_GUI:
         self.hinweisText.pack()
 
     # Funktion für mehr Adressfelder (btnMoreAddresses)
-    def addAddress(self):
+    def is_vaild_adress(self):
         if (isinstance(self.adressEingabefeld.get(), str)):
             if(self.is_adressen_valide()):
-                self.fuege_adresse_hinzu()
+                self.add_adress()
             else:
-                self.zeige_fehler_an("Adressvalidierung fehlgeschlagen")
+                self.show_error("Adressvalidierung fehlgeschlagen")
         else:
-            self.zeige_fehler_an("Bitte geben Sie eine gültige Adresse ein.")
+            self.show_error("Bitte geben Sie eine gültige Adresse ein.")
 
-        # fügt Adresse zu Liste hinzu und Prüft ob Adresse erkannt
-
-        print(adresslist)
-
-    def zeige_fehler_an(self, text):
+    def show_error(self, text):
         self.hinweisText.config(text=text)
 
-    def fuege_adresse_hinzu(self):
-        print("adresse hinzugefügt")
+    def add_adress(self):
         self.hinweisText.config(text="Adresse hinzugefügt.")
-        adresslist.append(self.adressEingabefeld.get())
+        self.adresslist.append(self.adressEingabefeld.get())
         label = Label(self.fenster, text=" ● " + self.adressEingabefeld.get())
-        label.pack()  # you can use a bullet point emoji.
-        labels.append(label)
+        label.pack()
+        self.labels.append(label)
         self.adressEingabefeld.delete(0, END)
 
     def is_adressen_valide(self):
-        print(type(self.adressEingabefeld.get()))
-        query = urllib.parse.quote(self.adressEingabefeld.get(), safe="")
-        urlPrefix = 'https://nominatim.openstreetmap.org/search?q='
-        urlSuffix = "&format=jsonv2"
-        url = urlPrefix + query + urlSuffix
-        print("url=" + url)
-        r = requests.get(url, auth=('user', 'pass'))
-        r.status_code
-        print(str(r.content) != "b'[]'")
-        return str(r.content) != "b'[]'"
+        parsed_adress = urllib.parse.quote(self.adressEingabefeld.get(), safe="")
+        url = TSP_GUI.URL_PREFIX + parsed_adress + TSP_GUI.URL_SUFFIX
+        response = requests.get(url, auth=('user', 'pass'))
+        return str(response.content) != "b'[]'"
 
+    def solve(self):
+        self.distanceMatrixGenerator = DistanceMatrixGenerator(adressList=self.adresslist)
 
-    def submit(self):
-        def visualize():
-            build_request(solution_nodes)
+        def visualize_solution(solver):
+            build_request(solver.getSolutionNodes(), self.distanceMatrixGenerator)
 
-        def runAsync():
-            getSolution(adresslist, generate_distance_matrix(adresslist))
-            visualize()
+        def run_async(solver):
+            solver.getSolution()
+            visualize_solution(solver)
             self.routeErzeugenButton.config(state="normal")
-
-        threading.Thread(target=runAsync).start()
+        solver = Solver()
+        threading.Thread(target=run_async(solver)).start()
         self.routeErzeugenButton.config(state="disabled")
 
-    def clearList(self):
-        adresslist.clear()
-        for lbl in labels:
+    def clear_list(self):
+        self.adresslist.clear()
+        for lbl in self.labels:
             lbl.after(100, lbl.destroy())
-        print(adresslist)
 
-
-# führte bei mir zu nur schwarzem Fenster. Neue Python Version 3.10 heruntergeladen.
 app = Tk()
 ma = TSP_GUI(app)
 app.mainloop()
