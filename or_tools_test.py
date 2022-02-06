@@ -5,13 +5,20 @@ class Solver:
         self.solution_nodes = []
         self.distanceMatrixGenerator = distanceMatrixGenerator
         self.distanceMatrix = self.distanceMatrixGenerator.generate_distance_matrix()
-        self.data_model = {('distance_matrix', self.distanceMatrix), ('num_vehicles', 1), ('depot', 0)}
-        self.manager = pywrapcp.RoutingIndexManager(len(data['distance_matrix']), data['num_vehicles'], data['depot'])
-        self.routing = pywrapcp.RoutingModel(manager)
+        self.data = self.create_data_model(self.distanceMatrix)
+        self.manager = pywrapcp.RoutingIndexManager(len(self.data['distance_matrix']), self.data['num_vehicles'], self.data['depot'])
+        self.routing = pywrapcp.RoutingModel(self.manager)
         transit_callback_index = self.routing.RegisterTransitCallback(self.distance_callback)
         self.routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
         self.search_parameters = pywrapcp.DefaultRoutingSearchParameters()
         self.search_parameters.first_solution_strategy = (routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
+
+    def create_data_model(self, distanceMatrix):
+        data = {}
+        data['distance_matrix'] = distanceMatrix
+        data['num_vehicles'] = 1
+        data['depot'] = 0
+        return data
 
     def distance_callback(self, from_index, to_index):
         """Returns the distance between the two nodes."""
@@ -40,7 +47,7 @@ class Solver:
     def getSolution(self):
         solution = self.routing.SolveWithParameters(self.search_parameters)
         if solution:
-            self.print_solution(self.manager, self.routing, solution, self.distanceMatrixGenerator)
+            self.print_solution(self.manager, self.routing, solution)
 
     def getSolutionNodes(self):
         return self.solution_nodes

@@ -4,7 +4,7 @@ from or_tools_test import Solver
 import threading
 import urllib.parse
 from distance_matrix_generator import DistanceMatrixGenerator
-from test_webbrowser import build_request
+from test_webbrowser import build_request, make_request, startVisualizing
 
 
 class TSP_GUI:
@@ -46,7 +46,7 @@ class TSP_GUI:
     # Funktion für mehr Adressfelder (btnMoreAddresses)
     def is_vaild_adress(self):
         if (isinstance(self.adressEingabefeld.get(), str)):
-            if(self.is_adressen_valide()):
+            if(self.is_adresse_valide()):
                 self.add_adress()
             else:
                 self.show_error("Adressvalidierung fehlgeschlagen")
@@ -64,7 +64,7 @@ class TSP_GUI:
         self.labels.append(label)
         self.adressEingabefeld.delete(0, END)
 
-    def is_adressen_valide(self):
+    def is_adresse_valide(self):
         parsed_adress = urllib.parse.quote(self.adressEingabefeld.get(), safe="")
         url = TSP_GUI.URL_PREFIX + parsed_adress + TSP_GUI.URL_SUFFIX
         response = requests.get(url, auth=('user', 'pass'))
@@ -74,15 +74,16 @@ class TSP_GUI:
         self.distanceMatrixGenerator = DistanceMatrixGenerator(adressList=self.adresslist)
 
         def visualize_solution(solver):
-            build_request(solver.getSolutionNodes(), self.distanceMatrixGenerator)
+            url = build_request(solver.getSolutionNodes(), self.distanceMatrixGenerator)
+            make_request(url, self.distanceMatrixGenerator)
+            startVisualizing()
 
         def run_async(solver):
             solver.getSolution()
             visualize_solution(solver)
-            self.routeErzeugenButton.config(state="normal")
-        solver = Solver()
+
+        solver = Solver(self.distanceMatrixGenerator)
         threading.Thread(target=run_async(solver)).start()
-        self.routeErzeugenButton.config(state="disabled")
 
     def clear_list(self):
         self.adresslist.clear()
