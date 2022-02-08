@@ -1,5 +1,6 @@
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 
+#Problemlösung als Solver-Klasse
 class Solver:
     def __init__(self, distanceMatrixGenerator):
         self.solution_nodes = []
@@ -13,6 +14,7 @@ class Solver:
         self.search_parameters = pywrapcp.DefaultRoutingSearchParameters()
         self.search_parameters.first_solution_strategy = (routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
 
+    #Erstellt das Datenmodel für das TSP
     def create_data_model(self, distanceMatrix):
         data = {}
         data['distance_matrix'] = distanceMatrix
@@ -27,6 +29,7 @@ class Solver:
         to_node = self.manager.IndexToNode(to_index)
         return self.data['distance_matrix'][from_node][to_node]
 
+    #Print der Lösung (inkl. Distanz)
     def print_solution(self, manager, routing, solution):
         """Prints solution on console."""
         index = routing.Start(0)
@@ -44,10 +47,12 @@ class Solver:
         print(plan_output)
         print(self.solution_nodes)
 
+    #Erstellt die Lösung des TSPs und printet diese wenn vorhanden
     def getSolution(self):
         solution = self.routing.SolveWithParameters(self.search_parameters)
         if solution:
             self.print_solution(self.manager, self.routing, solution)
 
+    #Getter für die einzelnen Nodes der Lösung
     def getSolutionNodes(self):
         return self.solution_nodes

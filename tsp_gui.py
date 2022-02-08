@@ -4,7 +4,7 @@ from or_tools_test import Solver
 import threading
 import urllib.parse
 from distance_matrix_generator import DistanceMatrixGenerator
-from test_webbrowser import build_request, make_request, startVisualizing
+from visualize_solution import build_request, make_request, startVisualizing
 
 
 class TSP_GUI:
@@ -12,6 +12,7 @@ class TSP_GUI:
     URL_PREFIX = 'https://nominatim.openstreetmap.org/search?q='
     URL_SUFFIX = "&format=jsonv2"
 
+    # GUI Init
     def __init__(self, mainW):
         self.distanceMatrixGenerator = None
         self.create_labels(mainW)
@@ -36,6 +37,7 @@ class TSP_GUI:
 
         mainW.title('Routenplaner')
 
+    # Erstellt Label
     def create_labels(self, fenster):
         Label(fenster, text="Rotenplaner Deluxe", font=("Arial", 20)).pack()
         Label(fenster, text="von Sophie R., Svea-Nele J., Niklas L.", font=("Arial", 14, "italic")).pack()
@@ -52,10 +54,11 @@ class TSP_GUI:
                 self.show_error("Adressvalidierung fehlgeschlagen")
         else:
             self.show_error("Bitte geben Sie eine gültige Adresse ein.")
-
+    # Zeigt einen Fehler beim Hinweislabel an
     def show_error(self, text):
         self.hinweisText.config(text=text)
 
+    # Fügt eine Adresse zur Adressenliste hinzu
     def add_adress(self):
         self.hinweisText.config(text="Adresse hinzugefügt.")
         self.adresslist.append(self.adressEingabefeld.get())
@@ -64,20 +67,25 @@ class TSP_GUI:
         self.labels.append(label)
         self.adressEingabefeld.delete(0, END)
 
+    #Prüft ob eine eingegebene Adresse valide ist (Return true wenn valide, false wenn nicht)
     def is_adresse_valide(self):
         parsed_adress = urllib.parse.quote(self.adressEingabefeld.get(), safe="")
         url = TSP_GUI.URL_PREFIX + parsed_adress + TSP_GUI.URL_SUFFIX
         response = requests.get(url, auth=('user', 'pass'))
         return str(response.content) != "b'[]'"
 
+    #Lösung des TSPs
     def solve(self):
         self.distanceMatrixGenerator = DistanceMatrixGenerator(adressList=self.adresslist)
 
+        #Visualisiert die Lösung wenn möglich
         def visualize_solution(solver):
+            if(len(self.distanceMatrixGenerator.adressList) > 4):
+                return
             url = build_request(solver.getSolutionNodes(), self.distanceMatrixGenerator)
             make_request(url, self.distanceMatrixGenerator)
             startVisualizing()
-
+        #Funktion zum asynchronem Lösen des Problems
         def run_async(solver):
             solver.getSolution()
             visualize_solution(solver)
@@ -85,6 +93,7 @@ class TSP_GUI:
         solver = Solver(self.distanceMatrixGenerator)
         threading.Thread(target=run_async(solver)).start()
 
+    #Löscht die Adressenliste
     def clear_list(self):
         self.adresslist.clear()
         for lbl in self.labels:
